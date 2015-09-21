@@ -30,20 +30,20 @@ class GitHistoryView extends SelectListView
             output = ''
             if commits?
               for commit in commits
-                freeTextMatches = commit.match(/{"author": "(.*?)","relativeDate": ".*?","fullDate": ".*?","message": "(.*)","hash": "[a-f0-9]*?"},/)
+                freeTextMatches = commit.match(/{"author": "(.*?)","relativeDate": "(.*?)","fullDate": "(.*?)","message": "(.*?)","hash": "[a-f0-9]*?"},/)
 
-                author = freeTextMatches[1]
-                authorEscaped = author.replace(/\\/g, "\\\\").replace(/\"/g, "\\\"")
-                commitAltered = commit.replace(author, authorEscaped)
+                commitEscaped = commit
+                for index in [1..4]
+                  freeText = freeTextMatches[index]
+                  freeTextEscaped = freeText.replace(/\\/g, "\\\\").replace(/\"/g, "\\\"")
+                  commitEscaped = commitEscaped.replace(freeText, freeTextEscaped)
 
-                message = freeTextMatches[2]
-                messageEscaped = message.replace(/\\/g, "\\\\").replace(/\"/g, "\\\"")
-                output += commitAltered.replace(message, messageEscaped)
+                output += commitEscaped
 
-            if output?.substring(output.length - 1) is ","
+              if output?.substring(output.length - 1) is ","
                 output = output.substring(0, output.length - 1)
 
-            logItems.push item for item in JSON.parse "[#{output}]"
+              logItems.push item for item in JSON.parse "[#{output}]"
 
         exit = (code) =>
             if code is 0 and logItems.length isnt 0
